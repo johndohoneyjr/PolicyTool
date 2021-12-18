@@ -1,0 +1,16 @@
+{
+    "CognitiveScience":{
+        "SKU_URI":"https://management.azure.com/subscriptions/ + Subscription_ID + /providers/Microsoft.CognitiveServices/skus?api-version=2021-10-01",
+        "excludeSKU": ["Standard", "Premium"],
+        "excludeAction" : "audit",
+        "AzureRegions": ["WESTUS3", "WESTUS2", "WESTUS"]
+    },
+    "Other14APIs":{
+        "ConfigStuff":[
+            "itemA",
+            "itemB",
+            "itemCs"
+            ],
+        "use_anonymous":true
+    }
+}
