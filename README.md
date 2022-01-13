@@ -1,6 +1,6 @@
 # Blast Radius Policy Enforcement Tool
 
-![Policy Editor](./images/Blast_Radius.png "Policy Editor")
+![Policy Editor](./images/Blast_Radius.pdf "Policy Editor") 
 
 ## The big idea is to constrain the provisioning limits on Azure, by setting up well defined parameters for resource creation using the Azure Resource Manager.
 
