@@ -67,17 +67,70 @@ def Process_Deny_List(SKUs,SKU_Exclustion_List, Regions_To_Process):
 
     return Deny_List;
 
+def Policy_Definition(bearer_token, policy_definition_name, azure_policy_definition):
+
+  Subscription_ID = os.environ["PT_SUBSCRIPTION_ID"];
+  azure_policy_definition['properties']['displayName'] = policy_definition_name
+
+  SKU_URL  = "https://management.azure.com/subscriptions/" + Subscription_ID + "/providers/Microsoft.Authorization/policyDefinitions/" + policy_definition_name + "?api-version=2021-06-01";
+  r = requests.put(
+      url=SKU_URL,
+      data=json.dumps( azure_policy_definition ),
+      headers={"Authorization": 'Bearer ' + bearer_token,"Content-Type": "application/json"}
+  );
+
+  if r.status_code == 201:
+    payload = json.loads(r.text);
+    return payload
+  else:
+      print( r.text );
+      return ""
 
 if __name__ == '__main__':
 
   # Load Configuration
     with open("config.json", "r") as policy_configuration:
       POLICY_CFG = json.load(policy_configuration);
+
+    # myPolicy = POLICY_CFG['CognitiveScience']['Rule']
+    # myPolicy['properties']['displayName'] = "This is too cool for policies"
+    # myPolicy['properties']['parameters']['effect']['allowedValues'] = ["thisway","thatway"]
+    # myPolicy['properties']['parameters']['effect']['defaultValue']  = ["noway"]
+
     bearer_token = oauth_client_credential();
+    print( bearer_token)
+
+
+    #
+    # Resource Group Location Policy
+    #
+    if  POLICY_CFG['ResourceGroupLocation']['AzureRegions']:
+      POLICY_CFG['ResourceGroupLocation']['Rule']['properties']['parameters']['listOfAllowedLocations']['allowedValues'] = POLICY_CFG['ResourceGroupLocation']['AzureRegions']
+    my_result = Policy_Definition( bearer_token, 
+                                   POLICY_CFG['ResourceGroupLocation']['RuleName'], 
+                                   POLICY_CFG['ResourceGroupLocation']['Rule'])
+
+
+    #
+    # Resource Location Policy
+    #
+    my_result = Policy_Definition( bearer_token, 
+                                   POLICY_CFG['RegionLocation']['RuleName'], 
+                                   POLICY_CFG['RegionLocation']['Rule'])
+
+
+    #
+    # Cognitive Science API Policy
+    #
     SKU_DICT = Cognitive_API_SKU( bearer_token );
-    
+
     Deny_List =  Process_Deny_List( SKU_DICT,
                                     POLICY_CFG['CognitiveScience']['excludeSKU'], 
                                     POLICY_CFG['CognitiveScience']['AzureRegions'] );
 
-    print("Processed " + str(len(Deny_List)) + " SKU's for Azure Policy processing")
+   # print("Processed " + str(len(Deny_List)) + " SKU's for Azure Policy processing")
+
+    myPolicy = POLICY_CFG['CognitiveScience']['Rule']
+    my_result = Policy_Definition( bearer_token, 
+                                   POLICY_CFG['CognitiveScience']['RuleName'], 
+                                   POLICY_CFG['CognitiveScience']['Rule'])
