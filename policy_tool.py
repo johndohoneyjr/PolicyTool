@@ -56,6 +56,7 @@ def Cognitive_API_SKU(bearer_token):
 def Process_Deny_List(SKUs,SKU_Exclustion_List, Regions_To_Process):
     
     Deny_List = list();
+    Deny_SKUS = list();
 
     for OUTER_DICTIONARY, INNER_DICTIONARY in SKUs.items():
       for key in INNER_DICTIONARY:
@@ -64,8 +65,10 @@ def Process_Deny_List(SKUs,SKU_Exclustion_List, Regions_To_Process):
           for region in Regions_To_Process:
             if currentRegion == region:
               Deny_List.append( key )
+              if key['name'] not in Deny_SKUS:
+                Deny_SKUS.append( key['name'] )
 
-    return Deny_List;
+    return Deny_SKUS;
 
 def Policy_Definition(bearer_token, policy_definition_name, azure_policy_definition):
 
@@ -93,26 +96,25 @@ if __name__ == '__main__':
       POLICY_CFG = json.load(policy_configuration);
 
     bearer_token = oauth_client_credential();
-    print( bearer_token)
 
     #
     # Resource Group Location Policy
     #
     # az provider list --query [?namespace=='Microsoft.Resources'].resourceTypes[].resourceType --output table
     #
-    if  POLICY_CFG['ResourceGroupLocation']['AzureRegions']:
-      POLICY_CFG['ResourceGroupLocation']['Rule']['properties']['parameters']['listOfAllowedLocations']['allowedValues'] = POLICY_CFG['ResourceGroupLocation']['AzureRegions']
-    my_result = Policy_Definition( bearer_token, 
-                                   POLICY_CFG['ResourceGroupLocation']['RuleName'], 
-                                   POLICY_CFG['ResourceGroupLocation']['Rule'])
+    #if  POLICY_CFG['ResourceGroupLocation']['AzureRegions']:
+    #  POLICY_CFG['ResourceGroupLocation']['Rule']['properties']['parameters']['listOfAllowedLocations']['allowedValues'] = POLICY_CFG['ResourceGroupLocation']['AzureRegions']
+    # my_result = Policy_Definition( bearer_token, 
+    #                                POLICY_CFG['ResourceGroupLocation']['RuleName'], 
+    #                                POLICY_CFG['ResourceGroupLocation']['Rule'])
 
 
     #
     # Resource Location Policy
     #
-    my_result = Policy_Definition( bearer_token, 
-                                   POLICY_CFG['RegionLocation']['RuleName'], 
-                                   POLICY_CFG['RegionLocation']['Rule'])
+    # my_result = Policy_Definition( bearer_token, 
+    #                                POLICY_CFG['RegionLocation']['RuleName'], 
+    #                                POLICY_CFG['RegionLocation']['Rule'])
 
 
     #
@@ -122,11 +124,16 @@ if __name__ == '__main__':
 
     Deny_List =  Process_Deny_List( SKU_DICT,
                                     POLICY_CFG['CognitiveScience']['excludeSKU'], 
-                                    POLICY_CFG['CognitiveScience']['AzureRegions'] );
+                                    POLICY_CFG['CognitiveScience']['NormalizedRegions'] );
 
-   # print("Processed " + str(len(Deny_List)) + " SKU's for Azure Policy processing")
+    print("Processed " + str(len(Deny_List)) + " SKU's for Azure Policy processing")
 
     myPolicy = POLICY_CFG['CognitiveScience']['Rule']
+    myPolicy['properties']['parameters']['DisAllowedSKUs']['allowedValues'] = Deny_List
+    
+    if Deny_List:
+      POLICY_CFG['CognitiveScience']['Rule']['properties']['parameters']['DisAllowedSKUs']['allowedValues'] = Deny_List
+
     my_result = Policy_Definition( bearer_token, 
                                    POLICY_CFG['CognitiveScience']['RuleName'], 
                                    POLICY_CFG['CognitiveScience']['Rule'])

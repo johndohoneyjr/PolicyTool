@@ -1,5 +1,7 @@
 # Blast Radius Policy Enforcement Tool
 
+![Policy Editor](./images/Blast_Radius.png "Policy Editor")
+
 ## The big idea is to constrain the provisioning limits on Azure, by setting up well defined parameters for resource creation using the Azure Resource Manager.
 
 The tool is driven by a configuration file.  Values can be added to the definition, without fear of breaking the code.  However, any update/change or delete will have to be vetted against the code, as the JSON configuration is "cast" into a Python Dictionary to address aspects of the configuration.
