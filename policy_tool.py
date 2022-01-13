@@ -5,9 +5,7 @@ from pprint import pprint
 
 
 def oauth_client_credential():
-
-  # Extract data necessary for Validation from the Azure Key Vault
-
+  # Extract data necessary for Validation from the Environment
   clientID       = os.environ["PT_CLIENT_ID"];
   clientSecret   = os.environ["PT_CLIENT_SECRET"];
   resourceAPIURL = os.environ["PT_RESOURCE_URL"]; 
@@ -40,7 +38,6 @@ def oauth_client_credential():
       return ""
 
 def Cognitive_API_SKU(bearer_token):
-
   Subscription_ID = os.environ["PT_SUBSCRIPTION_ID"];
   SKU_URL  = "https://management.azure.com/subscriptions/" + Subscription_ID + "/providers/Microsoft.CognitiveServices/skus?api-version=2021-10-01";
   r = requests.get(
@@ -54,7 +51,6 @@ def Cognitive_API_SKU(bearer_token):
       return ""
 
 def Process_Deny_List(SKUs,SKU_Exclustion_List, Regions_To_Process):
-    
     Deny_List = list();
     Deny_SKUS = list();
 
@@ -71,7 +67,6 @@ def Process_Deny_List(SKUs,SKU_Exclustion_List, Regions_To_Process):
     return Deny_SKUS;
 
 def Policy_Definition(bearer_token, policy_definition_name, azure_policy_definition):
-
   Subscription_ID = os.environ["PT_SUBSCRIPTION_ID"];
   azure_policy_definition['properties']['displayName'] = policy_definition_name
 
@@ -84,6 +79,7 @@ def Policy_Definition(bearer_token, policy_definition_name, azure_policy_definit
 
   if r.status_code == 201:
     payload = json.loads(r.text);
+    # Next update - return the Policy ID to Assign a Policy
     return payload
   else:
       print( r.text );
@@ -100,26 +96,23 @@ if __name__ == '__main__':
     #
     # Resource Group Location Policy
     #
-    # az provider list --query [?namespace=='Microsoft.Resources'].resourceTypes[].resourceType --output table
-    #
-    #if  POLICY_CFG['ResourceGroupLocation']['AzureRegions']:
-    #  POLICY_CFG['ResourceGroupLocation']['Rule']['properties']['parameters']['listOfAllowedLocations']['allowedValues'] = POLICY_CFG['ResourceGroupLocation']['AzureRegions']
-    # my_result = Policy_Definition( bearer_token, 
-    #                                POLICY_CFG['ResourceGroupLocation']['RuleName'], 
-    #                                POLICY_CFG['ResourceGroupLocation']['Rule'])
-
-
+    if  POLICY_CFG['ResourceGroupLocation']['AzureRegions']:
+     POLICY_CFG['ResourceGroupLocation']['Rule']['properties']['parameters']['listOfAllowedLocations']['allowedValues'] = POLICY_CFG['ResourceGroupLocation']['AzureRegions']
+    my_result = Policy_Definition( bearer_token, 
+                                   POLICY_CFG['ResourceGroupLocation']['RuleName'], 
+                                   POLICY_CFG['ResourceGroupLocation']['Rule'])
     #
     # Resource Location Policy
     #
-    # my_result = Policy_Definition( bearer_token, 
-    #                                POLICY_CFG['RegionLocation']['RuleName'], 
-    #                                POLICY_CFG['RegionLocation']['Rule'])
+    my_result = Policy_Definition( bearer_token, 
+                                   POLICY_CFG['RegionLocation']['RuleName'], 
+                                   POLICY_CFG['RegionLocation']['Rule'])
 
 
     #
     # Cognitive Science API Policy
     #
+    # az provider list --query [?namespace=='Microsoft.Resources'].resourceTypes[].resourceType --output table
     SKU_DICT = Cognitive_API_SKU( bearer_token );
 
     Deny_List =  Process_Deny_List( SKU_DICT,
@@ -128,9 +121,6 @@ if __name__ == '__main__':
 
     print("Processed " + str(len(Deny_List)) + " SKU's for Azure Policy processing")
 
-    myPolicy = POLICY_CFG['CognitiveScience']['Rule']
-    myPolicy['properties']['parameters']['DisAllowedSKUs']['allowedValues'] = Deny_List
-    
     if Deny_List:
       POLICY_CFG['CognitiveScience']['Rule']['properties']['parameters']['DisAllowedSKUs']['allowedValues'] = Deny_List
 
