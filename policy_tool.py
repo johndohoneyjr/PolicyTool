@@ -92,17 +92,13 @@ if __name__ == '__main__':
     with open("config.json", "r") as policy_configuration:
       POLICY_CFG = json.load(policy_configuration);
 
-    # myPolicy = POLICY_CFG['CognitiveScience']['Rule']
-    # myPolicy['properties']['displayName'] = "This is too cool for policies"
-    # myPolicy['properties']['parameters']['effect']['allowedValues'] = ["thisway","thatway"]
-    # myPolicy['properties']['parameters']['effect']['defaultValue']  = ["noway"]
-
     bearer_token = oauth_client_credential();
     print( bearer_token)
 
-
     #
     # Resource Group Location Policy
+    #
+    # az provider list --query [?namespace=='Microsoft.Resources'].resourceTypes[].resourceType --output table
     #
     if  POLICY_CFG['ResourceGroupLocation']['AzureRegions']:
       POLICY_CFG['ResourceGroupLocation']['Rule']['properties']['parameters']['listOfAllowedLocations']['allowedValues'] = POLICY_CFG['ResourceGroupLocation']['AzureRegions']

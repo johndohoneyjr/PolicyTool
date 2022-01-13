@@ -4,7 +4,7 @@
         "excludeSKU": [],
         "excludeAction" : "deny",
         "RuleName" : "100-SCE-ALLOWED-RESOURCEGROUP-LOCATIONS",
-        "AzureRegions": ["WESTUS3", "WESTUS2", "WESTUS"],
+        "AzureRegions": ["West US","West US 2","West US 3"],
         "Parameters" : {},
         "Rule" : {
     "properties": {
@@ -51,7 +51,7 @@
         "excludeSKU": [],
         "excludeAction" : "deny",
         "RuleName" : "150-SCE-ALLOWED-LOCATIONS",
-        "AzureRegions": ["WESTUS3", "WESTUS2", "WESTUS"],
+        "AzureRegions": ["West US","West US 2","West US 3"],
         "Parameters" : {},
         "Rule" : {
             "properties": {
@@ -70,12 +70,8 @@
                     "strongType": "location",
                     "displayName": "Allowed locations"
                   },
-                  "allowedValues": [
-                      "westus",
-                      "westus3",
-                      "westus2"
-                  ],
-                  "defaultValue": ["westus2","westus","westus3"]
+                  "allowedValues": ["West US","West US 2","West US 3"],
+                  "defaultValue": []
                 }
               },
               "policyRule": {
@@ -97,7 +93,7 @@
         "excludeSKU": ["Standard", "Premium"],
         "excludeAction" : "deny",
         "RuleName" : "200-SCE-DENY-COGNITIVE-SCIENCE-APIS",
-        "AzureRegions": ["WESTUS3", "WESTUS2", "WESTUS"],
+        "AzureRegions": ["West US","West US 2","West US 3"],
         "Parameters" : {},
         "Rule" : {
             "properties": {
@@ -128,12 +124,8 @@
                             "strongType": "location",
                             "displayName": "Allowed locations"
                         },
-                        "allowedValues": [
-                            "westus",
-                            "westus3",
-                            "eastus"
-                        ],
-                        "defaultValue": ["eastus","westus"]
+                        "allowedValues": ["West US","West US 2","West US 3"],
+                        "defaultValue": []
                     },
                     "listOfAllowedSKUs": {
                         "type": "Array",
